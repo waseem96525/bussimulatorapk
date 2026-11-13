@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City Bus Simulator 3D 🚌</title>
+  <meta name="description" content="A realistic 3D city bus simulator — traffic signals, AI traffic, day/night, weather, passengers and fares." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== MAIN MENU ===== -->
+  <div id="mainMenu" class="screen active">
+    <div class="menu-bg">
+      <div class="stars"></div>
+      <div class="city-silhouette"></div>
+    </div>
+    <div class="menu-content">
+      <div class="logo-container">
+        <div class="bus-icon-large">🚌</div>
+        <h1 class="game-title">City Bus<br/><span>Simulator 3D</span></h1>
+        <p class="tagline">Drive • Pick Up • Deliver</p>
+      </div>
+      <div class="menu-buttons">
+        <button id="playBtn" class="btn btn-primary" onclick="startGame()">
+          <span class="btn-icon">▶</span> Start Shift
+        </button>
+        <button class="btn btn-secondary" onclick="showInstructions()">
+          <span class="btn-icon">📖</span> How to Play
+        </button>
+        <button class="btn btn-secondary" onclick="showHighScores()">
+          <span class="btn-icon">🏆</span> High Scores
+        </button>
+      </div>
+      <div class="menu-footer">
+        <div class="difficulty-selector">
+          <span>Difficulty:</span>
+          <button class="diff-btn" data-group="diff" data-value="easy" onclick="setOption('diff','easy')">Easy</button>
+          <button class="diff-btn active" data-group="diff" data-value="normal" onclick="setOption('diff','normal')">Normal</button>
+          <button class="diff-btn" data-group="diff" data-value="hard" onclick="setOption('diff','hard')">Hard</button>
+        </div>
+        <div class="difficulty-selector">
+          <span>Weather:</span>
+          <button class="diff-btn active" data-group="weather" data-value="clear" onclick="setOption('weather','clear')">☀️ Clear</button>
+          <button class="diff-btn" data-group="weather" data-value="rain" onclick="setOption('weather','rain')">🌧️ Rain</button>
+          <button class="diff-btn" data-group="weather" data-value="fog" onclick="setOption('weather','fog')">🌫️ Fog</button>
+        </div>
+        <div class="difficulty-selector">
+          <span>Start time:</span>
+          <button class="diff-btn" data-group="time" data-value="morning" onclick="setOption('time','morning')">🌅 Morning</button>
+          <button class="diff-btn" data-group="time" data-value="noon" onclick="setOption('time','noon')">🌞 Noon</button>
+          <button class="diff-btn active" data-group="time" data-value="evening" onclick="setOption('time','evening')">🌇 Evening</button>
+          <button class="diff-btn" data-group="time" data-value="night" onclick="setOption('time','night')">🌙 Night</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INSTRUCTIONS ===== -->
+  <div id="instructionsScreen" class="screen">
+    <div class="modal-box wide">
+      <h2>🎮 How to Play</h2>
+      <div class="instructions-grid">
+        <div class="inst-item"><span class="key">W / ↑</span><span>Accelerator</span></div>
+        <div class="inst-item"><span class="key">S / ↓</span><span>Brake (hold at stop = Reverse)</span></div>
+        <div class="inst-item"><span class="key">A D / ← →</span><span>Steer</span></div>
+        <div class="inst-item"><span class="key">SPACE</span><span>Open / Close doors</span></div>
+        <div class="inst-item"><span class="key">Q / E</span><span>Left / Right indicator</span></div>
+        <div class="inst-item"><span class="key">X</span><span>Hazard lights</span></div>
+        <div class="inst-item"><span class="key">L</span><span>Headlights</span></div>
+        <div class="inst-item"><span class="key">B</span><span>Parking brake</span></div>
+        <div class="inst-item"><span class="key">H</span><span>Horn</span></div>
+        <div class="inst-item"><span class="key">F (hold)</span><span>Refuel at pump</span></div>
+        <div class="inst-item"><span class="key">C</span><span>Camera (Chase/Cockpit/High/Cinematic)</span></div>
+        <div class="inst-item"><span class="key">Mouse drag</span><span>Look around</span></div>
+        <div class="inst-item"><span class="key">P / ESC</span><span>Pause</span></div>
+        <div class="inst-item"><span class="key">M</span><span>Mute</span></div>
+      </div>
+      <div class="inst-tips">
+        <h3>🎯 Rules of the road</h3>
+        <ul>
+          <li>🇮🇳 Traffic keeps <b>LEFT</b>. Bus stops are on the left kerb.</li>
+          <li>🚏 Stop fully inside the yellow <b>BUS STOP</b> bay, then press SPACE. Passengers pay fare when boarding.</li>
+          <li>🏁 Follow the blue GPS route to drop passengers at their stop — smooth driving earns <b>tips</b>.</li>
+          <li>🚦 Jumping a red light = ₹1000 fine. Speed limit <b>50 km/h</b> — speed cameras everywhere.</li>
+          <li>⛽ Diesel costs ₹95/L. Park beside an orange pump and hold F.</li>
+          <li>🌧️ Rain: wet roads, longer braking and less grip. Crashes cost repair money.</li>
+        </ul>
+      </div>
+      <button class="btn btn-primary" onclick="hideInstructions()">Got It! 👍</button>
+    </div>
+  </div>
+
+  <!-- ===== HIGH SCORES ===== -->
+  <div id="highScoresScreen" class="screen">
+    <div class="modal-box">
+      <h2>🏆 Best Shifts</h2>
+      <div id="scoresList" class="scores-list"></div>
+      <button class="btn btn-primary" onclick="hideHighScores()">Back</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME HUD ===== -->
+  <div id="gameHUD" class="hidden">
+    <div class="hud-top">
+      <div class="hud-left">
+        <div class="hud-card money">
+          <span class="hud-label">💰 Net Earnings</span>
+          <span class="hud-value" id="moneyDisplay">₹0</span>
+        </div>
+        <div class="hud-row">
+          <div class="hud-card small"><span class="hud-label">🎟️ Fares</span><span class="hud-value" id="fareDisplay">₹0</span></div>
+          <div class="hud-card small fines"><span class="hud-label">🚨 Fines+Repair</span><span class="hud-value" id="fineDisplay">₹0</span></div>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-row">
+          <div class="hud-card time"><span class="hud-label">⏱️ Shift left</span><span class="hud-value" id="timeDisplay">05:00</span></div>
+          <div class="hud-card clock"><span class="hud-label">🕒 Time</span><span class="hud-value" id="clockDisplay">17:00</span></div>
+        </div>
+        <div class="hud-card passengers">
+          <span class="hud-label">👥 Passengers</span>
+          <span class="hud-value" id="passengerDisplay">0/40</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="stopHint" class="center-hint hidden"></div>
+    <div id="fuelHint" class="center-hint fuel hidden"></div>
+
+    <div class="hud-bottom">
+      <div class="status-bars">
+        <div class="status-bar-item">
+          <span class="bar-label">⛽ Diesel</span>
+          <div class="bar-track"><div id="fuelBar" class="bar-fill" style="width:100%"></div></div>
+          <span class="bar-num" id="fuelText">0 L</span>
+        </div>
+        <div class="status-bar-item">
+          <span class="bar-label">🔧 Condition</span>
+          <div class="bar-track"><div id="healthBar" class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="status-bar-item">
+          <span class="bar-label">😊 Comfort</span>
+          <div class="bar-track"><div id="comfortBar" class="bar-fill" style="width:100%"></div></div>
+        </div>
+        <div class="tell-tales">
+          <span id="indL" class="tt ind">◀</span>
+          <span id="lightIcon" class="tt light">💡</span>
+          <span id="pbIcon" class="tt pb">(P)</span>
+          <span id="indR" class="tt ind">▶</span>
+        </div>
+      </div>
+
+      <div class="dash-center">
+        <div id="limitSign" class="limit-sign">50</div>
+        <div class="speedometer">
+          <div class="speed-value" id="speedDisplay">0</div>
+          <div class="speed-unit">km/h</div>
+          <div class="gear" id="gearDisplay">D1</div>
+          <div class="speed-arc">
+            <svg viewBox="0 0 100 60" width="140" height="84">
+              <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none" stroke="#333" stroke-width="7" stroke-linecap="round"/>
+              <path id="speedArc" d="M 10 55 A 40 40 0 0 1 90 55" fill="none" stroke="#00ff88" stroke-width="7" stroke-linecap="round" stroke-dasharray="0 126"/>
+            </svg>
+          </div>
+        </div>
+        <div class="rpm">
+          <div class="rpm-track"><div id="rpmBar" class="rpm-fill"></div></div>
+          <span id="rpmText">700 rpm</span>
+        </div>
+      </div>
+
+      <div class="hud-info">
+        <div class="next-stop-info">
+          <span id="nextStopLabel">🏁 Next</span>
+          <span id="nextStopName">-</span>
+          <span id="nextStopDist">-</span>
+        </div>
+        <div id="doorStatus" class="door-status">🚪 Doors closed</div>
+      </div>
+    </div>
+
+    <div id="notification" class="game-notification hidden"></div>
+
+    <div class="minimap-container">
+      <canvas id="minimap" width="190" height="190"></canvas>
+      <div class="minimap-label">GPS</div>
+    </div>
+
+    <button class="pause-btn" onclick="togglePause()" id="pauseBtn">⏸</button>
+    <div class="cam-hint">C camera · Q/E indicators · SPACE doors</div>
+  </div>
+
+  <!-- ===== PAUSE MENU ===== -->
+  <div id="pauseMenu" class="screen">
+    <div class="modal-box">
+      <h2>⏸ Paused</h2>
+      <button class="btn btn-primary" onclick="togglePause()">▶ Resume</button>
+      <button class="btn btn-secondary" onclick="restartGame()">🔄 Restart</button>
+      <button class="btn btn-secondary" onclick="goToMenu()">🏠 Main Menu</button>
+    </div>
+  </div>
+
+  <!-- ===== GAME OVER ===== -->
+  <div id="gameOverScreen" class="screen">
+    <div class="modal-box">
+      <div id="gameOverIcon" class="game-over-icon">🏁</div>
+      <h2 id="gameOverTitle">Shift Complete!</h2>
+      <div class="final-stats">
+        <div class="stat-row"><span>💰 Net Earnings</span><span id="finalScore">₹0</span></div>
+        <div class="stat-row"><span>🎟️ Fares + Tips</span><span id="finalMoney">₹0</span></div>
+        <div class="stat-row"><span>🚨 Fines, Repairs, Fuel</span><span id="finalFines">₹0</span></div>
+        <div class="stat-row"><span>👥 Passengers Delivered</span><span id="finalPassengers">0</span></div>
+        <div class="stat-row"><span>🚏 Stops Served</span><span id="finalTrips">0</span></div>
+        <div class="stat-row"><span>😊 Passenger Comfort</span><span id="finalComfort">100%</span></div>
+      </div>
+      <div id="newHighScore" class="new-high-score hidden">🎉 New Best Shift!</div>
+      <div class="game-over-buttons">
+        <button class="btn btn-primary" onclick="restartGame()">🔄 Drive Again</button>
+        <button class="btn btn-secondary" onclick="goToMenu()">🏠 Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Canvas -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/textures.js"></script>
+  <script src="js/batch.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/city.js"></script>
+  <script src="js/props.js"></script>
+  <script src="js/vehicles.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/traffic.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
